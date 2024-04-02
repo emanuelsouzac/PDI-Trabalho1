@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 from PIL import Image, ImageTk
 from tkinter import ttk
+import copy
 
 # Criação da janela
 root = tk.Tk()
@@ -10,6 +11,9 @@ root.title("Processamento de Imagens")
 root.config(bg="white")
 
 file_path = ""
+original_image, edition_image = None, None
+
+##### FUNÇÕES DE CONVERSÃO #####
 
 # Conversor RGB para HSB
 def RGBtoHSB(red, green, blue):
@@ -83,47 +87,59 @@ def HSBtoRGB(h, s, b):
 
     return int(r * 255.0), int(g * 255.0), int(b * 255.0)
 
-##### FUNÇÕES DOS BOTÕES #####
+##### FUNÇÃO PARA EXIBIR IMAGEM #####
 
-# Função de adicionar imagem
-def import_image():
-    global file_path
-    file_path = filedialog.askopenfilename()
-    image = Image.open(file_path)
+def exibithion():
+    global edition_image
+
+    # Fazendo cópia da imagem editada para exibição
+    exibithion_image = copy.copy(edition_image)
     # Ajustando tamanho da imagem para caber na exibição
-    if image.width>image.height:
+    if exibithion_image.width>exibithion_image.height:
         # Largura maior que altura
         width = 750
-        height = int(image.height*(750/image.width))
-        image = image.resize((width,height), Image.LANCZOS)
-    elif image.height>image.width:
+        height = int(exibithion_image.height*(750/exibithion_image.width))
+        exibithion_image = exibithion_image.resize((width,height), Image.LANCZOS)
+    elif exibithion_image.height>exibithion_image.width:
         # Altura maior que largura
         height = 600
-        width = int(image.width*(600/image.height))
-        image = image.resize((width,height), Image.LANCZOS)
+        width = int(exibithion_image.width*(600/exibithion_image.height))
+        exibithion_image = exibithion_image.resize((width,height), Image.LANCZOS)
     else:
         # Dimensões iguais
         height = 600
         width = 600
-        image = image.resize((width,height), Image.LANCZOS)
+        exibithion_image = exibithion_image.resize((width,height), Image.LANCZOS)
     # Ajustando canvas para o novo tamanho da imagem
-    canvas.config(width=image.width, height=image.height)
+    canvas.config(width=exibithion_image.width, height=exibithion_image.height)
     # Convertendo imagem para ser apresentada no canvas
-    image = ImageTk.PhotoImage(image)
+    exibithion_image = ImageTk.PhotoImage(exibithion_image)
     # Exibindo imagem
-    canvas.image = image
-    canvas.create_image(0, 0, image=image, anchor="nw")
+    canvas.image = exibithion_image
+    canvas.create_image(0, 0, image=exibithion_image, anchor="nw")
+
+##### FUNÇÕES DOS BOTÕES #####
+
+# Função de adicionar imagem
+def import_image():
+    global file_path, original_image, edition_image
+
+    file_path = filedialog.askopenfilename()
+    original_image = Image.open(file_path)
+    edition_image = copy.copy(original_image)
+
+    exibithion()
 
 # Função de exportar imagem
 #def export_image():
 
 # Função de brilho multiplicativo
 def brightness():
-    image = Image.open(file_path)
+    global edition_image
 
-    width = image.size[0]
-    height = image.size[1]
-    matrix_pixels = image.load() 
+    width = edition_image.size[0]
+    height = edition_image.size[1]
+    matrix_pixels = edition_image.load()
 
     for i in range(width):
         for j in range(height):
@@ -140,37 +156,15 @@ def brightness():
             new_pixel = (red, green, blue)
             matrix_pixels[i,j] = new_pixel
 
-    # Ajustando tamanho da imagem para caber na exibição
-    if image.width>image.height:
-        # Largura maior que altura
-        width = 750
-        height = int(image.height*(750/image.width))
-        image = image.resize((width,height), Image.LANCZOS)
-    elif image.height>image.width:
-        # Altura maior que largura
-        height = 600
-        width = int(image.width*(600/image.height))
-        image = image.resize((width,height), Image.LANCZOS)
-    else:
-        # Dimensões iguais
-        height = 600
-        width = 600
-        image = image.resize((width,height), Image.LANCZOS)
-    # Ajustando canvas para o novo tamanho da imagem
-    canvas.config(width=image.width, height=image.height)
-    # Convertendo imagem para ser apresentada no canvas
-    image = ImageTk.PhotoImage(image)
-    # Exibindo imagem
-    canvas.image = image
-    canvas.create_image(0, 0, image=image, anchor="nw")
+    exibithion()
 
 # Função de saturação multiplicativa
 def saturation():
-    image = Image.open(file_path)
+    global edition_image
 
-    width = image.size[0]
-    height = image.size[1]
-    matrix_pixels = image.load() 
+    width = edition_image.size[0]
+    height = edition_image.size[1]
+    matrix_pixels = edition_image.load() 
 
     for i in range(width):
         for j in range(height):
@@ -187,37 +181,15 @@ def saturation():
             new_pixel = (red, green, blue)
             matrix_pixels[i,j] = new_pixel
 
-    # Ajustando tamanho da imagem para caber na exibição
-    if image.width>image.height:
-        # Largura maior que altura
-        width = 750
-        height = int(image.height*(750/image.width))
-        image = image.resize((width,height), Image.LANCZOS)
-    elif image.height>image.width:
-        # Altura maior que largura
-        height = 600
-        width = int(image.width*(600/image.height))
-        image = image.resize((width,height), Image.LANCZOS)
-    else:
-        # Dimensões iguais
-        height = 600
-        width = 600
-        image = image.resize((width,height), Image.LANCZOS)
-    # Ajustando canvas para o novo tamanho da imagem
-    canvas.config(width=image.width, height=image.height)
-    # Convertendo imagem para ser apresentada no canvas
-    image = ImageTk.PhotoImage(image)
-    # Exibindo imagem
-    canvas.image = image
-    canvas.create_image(0, 0, image=image, anchor="nw")
+    exibithion()
 
 # Função de matiz aditiva
 def hue():
-    image = Image.open(file_path)
+    global edition_image
 
-    width = image.size[0]
-    height = image.size[1]
-    matrix_pixels = image.load() 
+    width = edition_image.size[0]
+    height = edition_image.size[1]
+    matrix_pixels = edition_image.load() 
 
     for i in range(width):
         for j in range(height):
@@ -234,43 +206,23 @@ def hue():
             new_pixel = (red, green, blue)
             matrix_pixels[i,j] = new_pixel
 
-    # Ajustando tamanho da imagem para caber na exibição
-    if image.width>image.height:
-        # Largura maior que altura
-        width = 750
-        height = int(image.height*(750/image.width))
-        image = image.resize((width,height), Image.LANCZOS)
-    elif image.height>image.width:
-        # Altura maior que largura
-        height = 600
-        width = int(image.width*(600/image.height))
-        image = image.resize((width,height), Image.LANCZOS)
-    else:
-        # Dimensões iguais
-        height = 600
-        width = 600
-        image = image.resize((width,height), Image.LANCZOS)
-    # Ajustando canvas para o novo tamanho da imagem
-    canvas.config(width=image.width, height=image.height)
-    # Convertendo imagem para ser apresentada no canvas
-    image = ImageTk.PhotoImage(image)
-    # Exibindo imagem
-    canvas.image = image
-    canvas.create_image(0, 0, image=image, anchor="nw")
+    exibithion()
 
 # Função de atribuição de saturação
 def saturation_assignment():
-    image = Image.open(file_path)
+    global edition_image
+
     # Abrindo a segunda imagem
     file_path_2 = filedialog.askopenfilename()
     image_2 = Image.open(file_path_2)
+
     # Verificando se as duas imagens possuem mesmas dimensões
-    if image.width == image_2.width and image.height == image_2.height:
+    if edition_image.width == image_2.width and edition_image.height == image_2.height:
 
-        width = image.size[0]
-        height = image.size[1]
+        width = edition_image.size[0]
+        height = edition_image.size[1]
 
-        matrix_pixels_1 = image.load()
+        matrix_pixels_1 = edition_image.load()
         matrix_pixels_2 = image_2.load()
 
         for i in range(width):
@@ -292,34 +244,17 @@ def saturation_assignment():
                 new_pixel_1 = (red_1, green_1, blue_1)
                 matrix_pixels_1[i,j] = new_pixel_1
 
-        # Ajustando tamanho da imagem para caber na exibição
-        if image.width>image.height:
-            # Largura maior que altura
-            width = 750
-            height = int(image.height*(750/image.width))
-            image = image.resize((width,height), Image.LANCZOS)
-        elif image.height>image.width:
-            # Altura maior que largura
-            height = 600
-            width = int(image.width*(600/image.height))
-            image = image.resize((width,height), Image.LANCZOS)
-        else:
-            # Dimensões iguais
-            height = 600
-            width = 600
-            image = image.resize((width,height), Image.LANCZOS)
-        # Ajustando canvas para o novo tamanho da imagem
-        canvas.config(width=image.width, height=image.height)
-        # Convertendo imagem para ser apresentada no canvas
-        image = ImageTk.PhotoImage(image)
-        # Exibindo imagem
-        canvas.image = image
-        canvas.create_image(0, 0, image=image, anchor="nw")
-    else:
-        messagebox.showerror("Erro", "Imagens não possuem mesma dimensão.")
+        exibithion()
     
 # Botão máscara de filtro
 #def filter_mask():
+        
+# Botão máscara de filtro
+def reset_image():
+    global original_image, edition_image
+    edition_image = original_image
+
+    exibithion()
 
 # Frame da esquerda onde ficarão os botões
 left_frame = tk.Frame(root, width=200, height=600, bg="grey")
@@ -349,6 +284,10 @@ saturationAssignment_button.pack(padx=5,pady=5)
 
 # Botão máscara de filtro
 filterMask_button = tk.Button(left_frame, text="Máscara de Filtro", bg="white")
+filterMask_button.pack(padx=5,pady=5)
+
+# Botão reset
+filterMask_button = tk.Button(left_frame, text="Reset", command=reset_image, bg="white")
 filterMask_button.pack(padx=5,pady=5)
 
 # Botão exportar imagem
