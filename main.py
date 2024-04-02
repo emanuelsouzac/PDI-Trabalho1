@@ -131,7 +131,19 @@ def import_image():
     exibithion()
 
 # Função de exportar imagem
-#def export_image():
+
+# Função de exportar imagem
+def export_image():
+    global edition_image
+    if edition_image:
+        save_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG files", "*.png"), ("JPEG files", "*.jpg"), ("All files", "*.*")])
+        if save_path:
+            edition_image.save(save_path)
+            messagebox.showinfo("Exportar Imagem", "Imagem exportada com sucesso.")
+    else:
+        messagebox.showerror("Erro", "Nenhuma imagem foi importada.")
+
+    
 
 # Função de brilho multiplicativo
 def brightness():
@@ -291,11 +303,12 @@ filterMask_button = tk.Button(left_frame, text="Reset", command=reset_image, bg=
 filterMask_button.pack(padx=5,pady=5)
 
 # Botão exportar imagem
-exportImage_button = tk.Button(left_frame, text="Exportar Imagem", bg="white")
+exportImage_button = tk.Button(left_frame, text="Exportar Imagem", command=export_image,bg="white")
 exportImage_button.pack(side="bottom", padx=5,pady=5)
 
 # Botão importar imagem
 importImage_button = tk.Button(left_frame, text="Importar Imagem", command=import_image, bg="white")
 importImage_button.pack(side="bottom", padx=5,pady=5)
+
 
 root.mainloop()
