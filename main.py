@@ -120,24 +120,6 @@ def import_image():
 # Função de brilho multiplicativo
 def brightness():
     image = Image.open(file_path)
-    # Ajustando tamanho da imagem para caber na exibição
-    if image.width>image.height:
-        # Largura maior que altura
-        width = 750
-        height = int(image.height*(750/image.width))
-        image = image.resize((width,height), Image.LANCZOS)
-    elif image.height>image.width:
-        # Altura maior que largura
-        height = 600
-        width = int(image.width*(600/image.height))
-        image = image.resize((width,height), Image.LANCZOS)
-    else:
-        # Dimensões iguais
-        height = 600
-        width = 600
-        image = image.resize((width,height), Image.LANCZOS)
-    # Ajustando canvas para o novo tamanho da imagem
-    canvas.config(width=image.width, height=image.height)
 
     width = image.size[0]
     height = image.size[1]
@@ -158,15 +140,6 @@ def brightness():
             new_pixel = (red, green, blue)
             matrix_pixels[i,j] = new_pixel
 
-    # Convertendo imagem para ser apresentada no canvas
-    image = ImageTk.PhotoImage(image)
-    # Exibindo imagem
-    canvas.image = image
-    canvas.create_image(0, 0, image=image, anchor="nw")
-
-# Função de saturação multiplicativa
-def saturation():
-    image = Image.open(file_path)
     # Ajustando tamanho da imagem para caber na exibição
     if image.width>image.height:
         # Largura maior que altura
@@ -185,6 +158,15 @@ def saturation():
         image = image.resize((width,height), Image.LANCZOS)
     # Ajustando canvas para o novo tamanho da imagem
     canvas.config(width=image.width, height=image.height)
+    # Convertendo imagem para ser apresentada no canvas
+    image = ImageTk.PhotoImage(image)
+    # Exibindo imagem
+    canvas.image = image
+    canvas.create_image(0, 0, image=image, anchor="nw")
+
+# Função de saturação multiplicativa
+def saturation():
+    image = Image.open(file_path)
 
     width = image.size[0]
     height = image.size[1]
@@ -205,15 +187,6 @@ def saturation():
             new_pixel = (red, green, blue)
             matrix_pixels[i,j] = new_pixel
 
-    # Convertendo imagem para ser apresentada no canvas
-    image = ImageTk.PhotoImage(image)
-    # Exibindo imagem
-    canvas.image = image
-    canvas.create_image(0, 0, image=image, anchor="nw")
-
-# Função de matiz aditiva
-def hue():
-    image = Image.open(file_path)
     # Ajustando tamanho da imagem para caber na exibição
     if image.width>image.height:
         # Largura maior que altura
@@ -232,6 +205,15 @@ def hue():
         image = image.resize((width,height), Image.LANCZOS)
     # Ajustando canvas para o novo tamanho da imagem
     canvas.config(width=image.width, height=image.height)
+    # Convertendo imagem para ser apresentada no canvas
+    image = ImageTk.PhotoImage(image)
+    # Exibindo imagem
+    canvas.image = image
+    canvas.create_image(0, 0, image=image, anchor="nw")
+
+# Função de matiz aditiva
+def hue():
+    image = Image.open(file_path)
 
     width = image.size[0]
     height = image.size[1]
@@ -252,6 +234,24 @@ def hue():
             new_pixel = (red, green, blue)
             matrix_pixels[i,j] = new_pixel
 
+    # Ajustando tamanho da imagem para caber na exibição
+    if image.width>image.height:
+        # Largura maior que altura
+        width = 750
+        height = int(image.height*(750/image.width))
+        image = image.resize((width,height), Image.LANCZOS)
+    elif image.height>image.width:
+        # Altura maior que largura
+        height = 600
+        width = int(image.width*(600/image.height))
+        image = image.resize((width,height), Image.LANCZOS)
+    else:
+        # Dimensões iguais
+        height = 600
+        width = 600
+        image = image.resize((width,height), Image.LANCZOS)
+    # Ajustando canvas para o novo tamanho da imagem
+    canvas.config(width=image.width, height=image.height)
     # Convertendo imagem para ser apresentada no canvas
     image = ImageTk.PhotoImage(image)
     # Exibindo imagem
@@ -259,7 +259,64 @@ def hue():
     canvas.create_image(0, 0, image=image, anchor="nw")
 
 # Função de atribuição de saturação
-#def saturation_assignment():
+def saturation_assignment():
+    image = Image.open(file_path)
+    # Abrindo a segunda imagem
+    file_path_2 = filedialog.askopenfilename()
+    image_2 = Image.open(file_path_2)
+    # Verificando se as duas imagens possuem mesmas dimensões
+    if image.width == image_2.width and image.height == image_2.height:
+
+        width = image.size[0]
+        height = image.size[1]
+
+        matrix_pixels_1 = image.load()
+        matrix_pixels_2 = image_2.load()
+
+        for i in range(width):
+            for j in range(height):
+                pixel_1 = matrix_pixels_1[i,j]
+                red_1 = pixel_1[0]
+                green_1 = pixel_1[1]
+                blue_1 = pixel_1[2]
+                hue_1, sat_1, bright_1 = RGBtoHSB(red_1, green_1, blue_1)
+
+                pixel_2 = matrix_pixels_2[i,j]
+                red_2 = pixel_2[0]
+                green_2 = pixel_2[1]
+                blue_2 = pixel_2[2]
+                hue_2, sat_2, bright_2 = RGBtoHSB(red_2, green_2, blue_2)
+
+                red_1, green_1, blue_1 = HSBtoRGB(hue_1, sat_2, bright_1)
+
+                new_pixel_1 = (red_1, green_1, blue_1)
+                matrix_pixels_1[i,j] = new_pixel_1
+
+        # Ajustando tamanho da imagem para caber na exibição
+        if image.width>image.height:
+            # Largura maior que altura
+            width = 750
+            height = int(image.height*(750/image.width))
+            image = image.resize((width,height), Image.LANCZOS)
+        elif image.height>image.width:
+            # Altura maior que largura
+            height = 600
+            width = int(image.width*(600/image.height))
+            image = image.resize((width,height), Image.LANCZOS)
+        else:
+            # Dimensões iguais
+            height = 600
+            width = 600
+            image = image.resize((width,height), Image.LANCZOS)
+        # Ajustando canvas para o novo tamanho da imagem
+        canvas.config(width=image.width, height=image.height)
+        # Convertendo imagem para ser apresentada no canvas
+        image = ImageTk.PhotoImage(image)
+        # Exibindo imagem
+        canvas.image = image
+        canvas.create_image(0, 0, image=image, anchor="nw")
+    else:
+        messagebox.showerror("Erro", "Imagens não possuem mesma dimensão.")
     
 # Botão máscara de filtro
 #def filter_mask():
@@ -287,7 +344,7 @@ hue_button = tk.Button(left_frame, text="Matiz HSB Aditiva", command=hue, bg="wh
 hue_button.pack(padx=5,pady=5)
 
 # Botão atribuição de saturação de outra imagem
-saturationAssignment_button = tk.Button(left_frame, text="Atribuição de Saturação", bg="white")
+saturationAssignment_button = tk.Button(left_frame, text="Atribuição de Saturação", command=saturation_assignment, bg="white")
 saturationAssignment_button.pack(padx=5,pady=5)
 
 # Botão máscara de filtro
