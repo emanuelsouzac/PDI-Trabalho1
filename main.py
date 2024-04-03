@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
 from PIL import Image, ImageTk
-from tkinter import ttk
 import copy
 
 # Criação da janela
@@ -95,21 +94,21 @@ def exibithion():
     # Fazendo cópia da imagem editada para exibição
     exibithion_image = copy.copy(edition_image)
     # Ajustando tamanho da imagem para caber na exibição
-    if exibithion_image.width>exibithion_image.height:
+    if exibithion_image.width > exibithion_image.height:
         # Largura maior que altura
         width = 750
-        height = int(exibithion_image.height*(750/exibithion_image.width))
-        exibithion_image = exibithion_image.resize((width,height), Image.LANCZOS)
-    elif exibithion_image.height>exibithion_image.width:
+        height = int(exibithion_image.height * (750 / exibithion_image.width))
+        exibithion_image = exibithion_image.resize((width, height), Image.LANCZOS)
+    elif exibithion_image.height > exibithion_image.width:
         # Altura maior que largura
         height = 600
-        width = int(exibithion_image.width*(600/exibithion_image.height))
-        exibithion_image = exibithion_image.resize((width,height), Image.LANCZOS)
+        width = int(exibithion_image.width * (600 / exibithion_image.height))
+        exibithion_image = exibithion_image.resize((width, height), Image.LANCZOS)
     else:
         # Dimensões iguais
         height = 600
         width = 600
-        exibithion_image = exibithion_image.resize((width,height), Image.LANCZOS)
+        exibithion_image = exibithion_image.resize((width, height), Image.LANCZOS)
     # Ajustando canvas para o novo tamanho da imagem
     canvas.config(width=exibithion_image.width, height=exibithion_image.height)
     # Convertendo imagem para ser apresentada no canvas
@@ -117,6 +116,7 @@ def exibithion():
     # Exibindo imagem
     canvas.image = exibithion_image
     canvas.create_image(0, 0, image=exibithion_image, anchor="nw")
+
 
 ##### FUNÇÕES DOS BOTÕES #####
 
@@ -131,22 +131,46 @@ def import_image():
     exibithion()
 
 # Função de exportar imagem
-
-# Função de exportar imagem
 def export_image():
     global edition_image
     if edition_image:
-        save_path = filedialog.asksaveasfilename(defaultextension=".png", filetypes=[("PNG files", "*.png"), ("JPEG files", "*.jpg"), ("All files", "*.*")])
+        save_path = filedialog.asksaveasfilename(defaultextension=".png",
+                                                  filetypes=[("PNG files", "*.png"), ("JPEG files", "*.jpg"),
+                                                             ("All files", "*.*")])
         if save_path:
             edition_image.save(save_path)
             messagebox.showinfo("Exportar Imagem", "Imagem exportada com sucesso.")
     else:
         messagebox.showerror("Erro", "Nenhuma imagem foi importada.")
 
-    
-
 # Função de brilho multiplicativo
 def brightness():
+    global edition_image, brightness_factor
+
+    width = edition_image.size[0]
+    height = edition_image.size[1]
+    matrix_pixels = edition_image.load()
+
+    for i in range(width):
+        for j in range(height):
+            pixel = matrix_pixels[i, j]
+
+            red = pixel[0]
+            green = pixel[1]
+            blue = pixel[2]
+
+            hue, sat, bright = RGBtoHSB(red, green, blue)
+            bright = bright * brightness_factor
+            red, green, blue = HSBtoRGB(hue, sat, bright)
+
+            new_pixel = (red, green, blue)
+            matrix_pixels[i, j] = new_pixel
+
+    exibithion()
+
+
+# Função de saturação multiplicativa
+def saturation():
     global edition_image
 
     width = edition_image.size[0]
@@ -155,43 +179,18 @@ def brightness():
 
     for i in range(width):
         for j in range(height):
-            pixel = matrix_pixels[i,j]
-            
+            pixel = matrix_pixels[i, j]
+
             red = pixel[0]
             green = pixel[1]
             blue = pixel[2]
 
             hue, sat, bright = RGBtoHSB(red, green, blue)
-            bright = bright * 0.2 # Após converter para HSB, aplicar fator na variável de brilho, posteriormente convertendo para RGB e exibindo o resultado
+            sat = sat * 1.5  # Após converter para HSB, aplicar fator na variável de saturação, posteriormente convertendo para RGB e exibindo o resultado
             red, green, blue = HSBtoRGB(hue, sat, bright)
 
             new_pixel = (red, green, blue)
-            matrix_pixels[i,j] = new_pixel
-
-    exibithion()
-
-# Função de saturação multiplicativa
-def saturation():
-    global edition_image
-
-    width = edition_image.size[0]
-    height = edition_image.size[1]
-    matrix_pixels = edition_image.load() 
-
-    for i in range(width):
-        for j in range(height):
-            pixel = matrix_pixels[i,j]
-            
-            red = pixel[0]
-            green = pixel[1]
-            blue = pixel[2]
-
-            hue, sat, bright = RGBtoHSB(red, green, blue)
-            sat = sat * 1.5 # Após converter para HSB, aplicar fator na variável de saturação, posteriormente convertendo para RGB e exibindo o resultado
-            red, green, blue = HSBtoRGB(hue, sat, bright)
-
-            new_pixel = (red, green, blue)
-            matrix_pixels[i,j] = new_pixel
+            matrix_pixels[i, j] = new_pixel
 
     exibithion()
 
@@ -201,22 +200,22 @@ def hue():
 
     width = edition_image.size[0]
     height = edition_image.size[1]
-    matrix_pixels = edition_image.load() 
+    matrix_pixels = edition_image.load()
 
     for i in range(width):
         for j in range(height):
-            pixel = matrix_pixels[i,j]
-            
+            pixel = matrix_pixels[i, j]
+
             red = pixel[0]
             green = pixel[1]
             blue = pixel[2]
 
             hue, sat, bright = RGBtoHSB(red, green, blue)
-            hue = (hue + 120) % 360 # Após converter para HSB, aplicar fator na variável de matiz, posteriormente convertendo para RGB e exibindo o resultado
+            hue = (hue + 120) % 360  # Após converter para HSB, aplicar fator na variável de matiz, posteriormente convertendo para RGB e exibindo o resultado
             red, green, blue = HSBtoRGB(hue, sat, bright)
 
             new_pixel = (red, green, blue)
-            matrix_pixels[i,j] = new_pixel
+            matrix_pixels[i, j] = new_pixel
 
     exibithion()
 
@@ -239,13 +238,13 @@ def saturation_assignment():
 
         for i in range(width):
             for j in range(height):
-                pixel_1 = matrix_pixels_1[i,j]
+                pixel_1 = matrix_pixels_1[i, j]
                 red_1 = pixel_1[0]
                 green_1 = pixel_1[1]
                 blue_1 = pixel_1[2]
                 hue_1, sat_1, bright_1 = RGBtoHSB(red_1, green_1, blue_1)
 
-                pixel_2 = matrix_pixels_2[i,j]
+                pixel_2 = matrix_pixels_2[i, j]
                 red_2 = pixel_2[0]
                 green_2 = pixel_2[1]
                 blue_2 = pixel_2[2]
@@ -254,23 +253,20 @@ def saturation_assignment():
                 red_1, green_1, blue_1 = HSBtoRGB(hue_1, sat_2, bright_1)
 
                 new_pixel_1 = (red_1, green_1, blue_1)
-                matrix_pixels_1[i,j] = new_pixel_1
+                matrix_pixels_1[i, j] = new_pixel_1
 
         exibithion()
-    
-# Botão máscara de filtro
-#def filter_mask():
-        
-# Botão máscara de filtro
+
+# Botão reset
 def reset_image():
     global original_image, edition_image
-    edition_image = original_image
+    edition_image = copy.copy(original_image)
 
     exibithion()
 
 # Frame da esquerda onde ficarão os botões
 left_frame = tk.Frame(root, width=200, height=600, bg="grey")
-left_frame.pack(side="left",fill="y")
+left_frame.pack(side="left", fill="y")
 
 # Onde a imagem será exibida
 canvas = tk.Canvas(root, width=750, height=600)
@@ -278,37 +274,54 @@ canvas.pack()
 
 ##### BOTÕES #####
 
-# Botão brilho HSB multiplicativo
-brightness_button = tk.Button(left_frame, text="Brilho HSB Multiplicativo", command=brightness, bg="white")
-brightness_button.pack(padx=5,pady=5)
-
 # Botão saturação HSB multiplicativa
 saturation_button = tk.Button(left_frame, text="Saturação HSB Multiplicativa", command=saturation, bg="white")
-saturation_button.pack(padx=5,pady=5)
+saturation_button.pack(padx=5, pady=5)
+
+# Botão brilho HSB multiplicativo
+def get_brightness_factor():
+    def apply_brightness_factor():
+        global brightness_factor
+        new_brightness = float(brightness_entry.get())
+        brightness_factor = new_brightness
+        brightness()  # Aplica o novo fator de brilho
+        
+    brightness_window = tk.Toplevel(root)
+    brightness_window.title("Fator de Brilho")
+    brightness_window.geometry("200x100")
+    brightness_window.resizable(False, False)
+
+    brightness_label = tk.Label(brightness_window, text="Insira o fator de brilho:")
+    brightness_label.pack(pady=5)
+
+    brightness_entry = tk.Entry(brightness_window)
+    brightness_entry.pack(pady=5)
+
+    ok_button = tk.Button(brightness_window, text="OK", command=apply_brightness_factor)
+    ok_button.pack(pady=5)
+
+brightness_button = tk.Button(left_frame, text="Brilho HSB Multiplicativo", command=get_brightness_factor, bg="white")
+brightness_button.pack(padx=5, pady=5)
+
+# Botão atribuição de saturação de outra imagem
+saturationAssignment_button = tk.Button(left_frame, text="Atribuição de Saturação", command=saturation_assignment,
+                                         bg="white")
+saturationAssignment_button.pack(padx=5, pady=5)
 
 # Botão matiz HSB aditiva
 hue_button = tk.Button(left_frame, text="Matiz HSB Aditiva", command=hue, bg="white")
-hue_button.pack(padx=5,pady=5)
-
-# Botão atribuição de saturação de outra imagem
-saturationAssignment_button = tk.Button(left_frame, text="Atribuição de Saturação", command=saturation_assignment, bg="white")
-saturationAssignment_button.pack(padx=5,pady=5)
-
-# Botão máscara de filtro
-filterMask_button = tk.Button(left_frame, text="Máscara de Filtro", bg="white")
-filterMask_button.pack(padx=5,pady=5)
+hue_button.pack(padx=5, pady=5)
 
 # Botão reset
-filterMask_button = tk.Button(left_frame, text="Reset", command=reset_image, bg="white")
-filterMask_button.pack(padx=5,pady=5)
+reset_button = tk.Button(left_frame, text="Reset", command=reset_image, bg="white")
+reset_button.pack(padx=5, pady=5)
 
 # Botão exportar imagem
-exportImage_button = tk.Button(left_frame, text="Exportar Imagem", command=export_image,bg="white")
-exportImage_button.pack(side="bottom", padx=5,pady=5)
+exportImage_button = tk.Button(left_frame, text="Exportar Imagem", command=export_image, bg="white")
+exportImage_button.pack(side="bottom", padx=5, pady=5)
 
 # Botão importar imagem
 importImage_button = tk.Button(left_frame, text="Importar Imagem", command=import_image, bg="white")
-importImage_button.pack(side="bottom", padx=5,pady=5)
-
+importImage_button.pack(side="bottom", padx=5, pady=5)
 
 root.mainloop()
