@@ -5,7 +5,7 @@ import copy
 
 # Criação da janela
 root = tk.Tk()
-root.geometry("1000x600")
+root.geometry("1280x720")
 root.title("Processamento de Imagens")
 root.config(bg="white")
 
@@ -135,8 +135,8 @@ def export_image():
     global edition_image
     if edition_image:
         save_path = filedialog.asksaveasfilename(defaultextension=".png",
-                                                  filetypes=[("PNG files", "*.png"), ("JPEG files", "*.jpg"),
-                                                             ("All files", "*.*")])
+                                                  filetypes=[("PNG files", ".png"), ("JPEG files", ".jpg"),
+                                                             ("All files", ".")])
         if save_path:
             edition_image.save(save_path)
             messagebox.showinfo("Exportar Imagem", "Imagem exportada com sucesso.")
@@ -269,14 +269,10 @@ left_frame = tk.Frame(root, width=200, height=600, bg="grey")
 left_frame.pack(side="left", fill="y")
 
 # Onde a imagem será exibida
-canvas = tk.Canvas(root, width=750, height=600)
+canvas = tk.Canvas(root, width=1080, height=720,bg="white")
 canvas.pack()
 
 ##### BOTÕES #####
-
-# Botão saturação HSB multiplicativa
-saturation_button = tk.Button(left_frame, text="Saturação HSB Multiplicativa", command=saturation, bg="white")
-saturation_button.pack(padx=5, pady=5)
 
 # Botão brilho HSB multiplicativo
 def get_brightness_factor():
@@ -301,27 +297,37 @@ def get_brightness_factor():
     ok_button.pack(pady=5)
 
 brightness_button = tk.Button(left_frame, text="Brilho HSB Multiplicativo", command=get_brightness_factor, bg="white")
-brightness_button.pack(padx=5, pady=5)
+brightness_button.pack(padx=5, pady=5, fill="x")
+
+# Botão saturação HSB multiplicativa
+saturation_button = tk.Button(left_frame, text="Saturação HSB Multiplicativa", command=saturation, bg="white")
+saturation_button.pack(padx=5, pady=5, fill="x")
+
+# Botão matiz HSB aditiva
+hue_button = tk.Button(left_frame, text="Matiz HSB Aditiva", command=hue, bg="white")
+hue_button.pack(padx=5, pady=5, fill="x")
 
 # Botão atribuição de saturação de outra imagem
 saturationAssignment_button = tk.Button(left_frame, text="Atribuição de Saturação", command=saturation_assignment,
                                          bg="white")
-saturationAssignment_button.pack(padx=5, pady=5)
+saturationAssignment_button.pack(padx=5, pady=5, fill="x")
 
-# Botão matiz HSB aditiva
-hue_button = tk.Button(left_frame, text="Matiz HSB Aditiva", command=hue, bg="white")
-hue_button.pack(padx=5, pady=5)
+# Botão máscara de filtro
+filterMask_button = tk.Button(left_frame, text="Máscara de Filtro", bg="white")
+filterMask_button.pack(padx=5,pady=5, fill="x")
 
 # Botão reset
 reset_button = tk.Button(left_frame, text="Reset", command=reset_image, bg="white")
-reset_button.pack(padx=5, pady=5)
+reset_button.pack(padx=5, pady=5, fill="x")
 
 # Botão exportar imagem
 exportImage_button = tk.Button(left_frame, text="Exportar Imagem", command=export_image, bg="white")
-exportImage_button.pack(side="bottom", padx=5, pady=5)
+exportImage_button.pack(side="bottom", padx=5, pady=5, fill="x")
 
 # Botão importar imagem
 importImage_button = tk.Button(left_frame, text="Importar Imagem", command=import_image, bg="white")
-importImage_button.pack(side="bottom", padx=5, pady=5)
+importImage_button.pack(side="bottom", padx=5, pady=5, fill="x")
+
+
 
 root.mainloop()
