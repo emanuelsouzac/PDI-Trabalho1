@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 from PIL import Image, ImageTk
 import copy
+import os
 
 # Criação da janela
 root = tk.Tk()
@@ -120,7 +121,28 @@ def exibithion():
 
 ##### FUNÇÕES DOS BOTÕES #####
 
-# Função de adicionar imagem
+# Função genérica para pop-up de entrada de usuário
+def get_user_input(label_text, callback):
+    def apply_user_input():
+        user_input = user_input_entry.get()
+        callback(user_input)
+        user_input_window.destroy()
+
+    user_input_window = tk.Toplevel(root)
+    user_input_window.title("Entrada do Usuário")
+    user_input_window.geometry("200x100")
+    user_input_window.resizable(False, False)
+
+    user_input_label = tk.Label(user_input_window, text=label_text)
+    user_input_label.pack(pady=5)
+
+    user_input_entry = tk.Entry(user_input_window)
+    user_input_entry.pack(pady=5)
+
+    ok_button = tk.Button(user_input_window, text="OK", command=apply_user_input)
+    ok_button.pack(pady=5)
+
+# Função de importar imagem
 def import_image():
     global file_path, original_image, edition_image
 
@@ -145,79 +167,87 @@ def export_image():
 
 # Função de brilho multiplicativo
 def brightness():
-    global edition_image, brightness_factor
+    def apply_brightness_factor(new_brightness):
+        global edition_image
 
-    width = edition_image.size[0]
-    height = edition_image.size[1]
-    matrix_pixels = edition_image.load()
+        width = edition_image.size[0]
+        height = edition_image.size[1]
+        matrix_pixels = edition_image.load()
 
-    for i in range(width):
-        for j in range(height):
-            pixel = matrix_pixels[i, j]
+        for i in range(width):
+            for j in range(height):
+                pixel = matrix_pixels[i, j]
 
-            red = pixel[0]
-            green = pixel[1]
-            blue = pixel[2]
+                red = pixel[0]
+                green = pixel[1]
+                blue = pixel[2]
 
-            hue, sat, bright = RGBtoHSB(red, green, blue)
-            bright = bright * brightness_factor
-            red, green, blue = HSBtoRGB(hue, sat, bright)
+                hue, sat, bright = RGBtoHSB(red, green, blue)
+                bright = bright * float(new_brightness)
+                red, green, blue = HSBtoRGB(hue, sat, bright)
 
-            new_pixel = (red, green, blue)
-            matrix_pixels[i, j] = new_pixel
+                new_pixel = (red, green, blue)
+                matrix_pixels[i, j] = new_pixel
 
-    exibithion()
+        exibithion()
 
+    get_user_input("Insira o fator de brilho:", apply_brightness_factor)
 
 # Função de saturação multiplicativa
 def saturation():
-    global edition_image
+    def apply_saturation_factor(saturation_factor):
+        global edition_image
 
-    width = edition_image.size[0]
-    height = edition_image.size[1]
-    matrix_pixels = edition_image.load()
+        width = edition_image.size[0]
+        height = edition_image.size[1]
+        matrix_pixels = edition_image.load()
 
-    for i in range(width):
-        for j in range(height):
-            pixel = matrix_pixels[i, j]
+        for i in range(width):
+            for j in range(height):
+                pixel = matrix_pixels[i, j]
 
-            red = pixel[0]
-            green = pixel[1]
-            blue = pixel[2]
+                red = pixel[0]
+                green = pixel[1]
+                blue = pixel[2]
 
-            hue, sat, bright = RGBtoHSB(red, green, blue)
-            sat = sat * 1.5  # Após converter para HSB, aplicar fator na variável de saturação, posteriormente convertendo para RGB e exibindo o resultado
-            red, green, blue = HSBtoRGB(hue, sat, bright)
+                hue, sat, bright = RGBtoHSB(red, green, blue)
+                sat = sat * float(saturation_factor)  # Após converter para HSB, aplicar fator na variável de saturação, posteriormente convertendo para RGB e exibindo o resultado
+                red, green, blue = HSBtoRGB(hue, sat, bright)
 
-            new_pixel = (red, green, blue)
-            matrix_pixels[i, j] = new_pixel
+                new_pixel = (red, green, blue)
+                matrix_pixels[i, j] = new_pixel
 
-    exibithion()
+        exibithion()
+
+    get_user_input("Insira o fator de saturação:", apply_saturation_factor)
 
 # Função de matiz aditiva
 def hue():
-    global edition_image
+    def apply_hue_factor(hue_factor):
+        global edition_image
 
-    width = edition_image.size[0]
-    height = edition_image.size[1]
-    matrix_pixels = edition_image.load()
+        width = edition_image.size[0]
+        height = edition_image.size[1]
+        matrix_pixels = edition_image.load()
 
-    for i in range(width):
-        for j in range(height):
-            pixel = matrix_pixels[i, j]
+        for i in range(width):
+            for j in range(height):
+                pixel = matrix_pixels[i, j]
 
-            red = pixel[0]
-            green = pixel[1]
-            blue = pixel[2]
+                red = pixel[0]
+                green = pixel[1]
+                blue = pixel[2]
 
-            hue, sat, bright = RGBtoHSB(red, green, blue)
-            hue = (hue + 120) % 360  # Após converter para HSB, aplicar fator na variável de matiz, posteriormente convertendo para RGB e exibindo o resultado
-            red, green, blue = HSBtoRGB(hue, sat, bright)
+                hue, sat, bright = RGBtoHSB(red, green, blue)
+                hue = (hue + float(hue_factor)) % 360  # Após converter para HSB, aplicar fator na variável de matiz, posteriormente convertendo para RGB e exibindo o resultado
+                red, green, blue = HSBtoRGB(hue, sat, bright)
 
-            new_pixel = (red, green, blue)
-            matrix_pixels[i, j] = new_pixel
+                new_pixel = (red, green, blue)
+                matrix_pixels[i, j] = new_pixel
 
-    exibithion()
+        exibithion()
+
+    get_user_input("Insira o fator de matiz:", apply_hue_factor)
 
 # Função de atribuição de saturação
 def saturation_assignment():
@@ -256,6 +286,85 @@ def saturation_assignment():
                 matrix_pixels_1[i, j] = new_pixel_1
 
         exibithion()
+    else:
+        messagebox.showerror("Erro", "As duas imagens não possuem as mesmas dimensões.")
+
+# Botão máscara de filtro
+def filter_mask():
+    global edition_image
+
+    # Abrindo txt e transformando em matriz
+    file_path = filedialog.askopenfilename(filetypes=[("Arquivos de texto", "*.txt")])
+
+    if file_path:
+
+        file_name = os.path.basename(file_path)
+
+        with open(file_path, 'r') as file:
+            lines = file.readlines()
+
+        matrix = []
+
+        for line in lines:
+            matrix.append([float(num) for num in line.split()])
+
+        # Número de linhas
+        lines = len(matrix)
+
+        # Número de colunas
+        columns = len(matrix[0])
+
+        largura, altura = (edition_image.width - columns + 1), (edition_image.height - lines + 1)
+        img2 = Image.new('RGB', (largura, altura))
+        matrix_pixels2 = img2.load()
+        
+        for i in range(altura):
+            for j in range(largura):
+                r, g, b = 0, 0, 0
+                for m in range(lines):
+                    for n in range(columns):
+                        # Ajustando as coordenadas para garantir que estejam dentro dos limites da imagem
+                        pixel_x = j + n
+                        pixel_y = i + m
+                        # Verificando se o pixel está dentro dos limites da imagem
+                        if 0 <= pixel_x < edition_image.width and 0 <= pixel_y < edition_image.height:
+                            # Obtendo os valores RGB do pixel da imagem original
+                            pixel_r, pixel_g, pixel_b = edition_image.getpixel((pixel_x, pixel_y))
+                            # Calculando os valores médios ponderados pelos valores na matriz de filtro
+                            r += pixel_r * matrix[m][n]
+                            g += pixel_g * matrix[m][n]
+                            b += pixel_b * matrix[m][n]
+                # Definindo os valores RGB no pixel correspondente na nova imagem
+                matrix_pixels2[j, i] = (int(r), int(g), int(b))
+        
+        edition_image = copy.copy(img2)
+        
+        matrix_pixels = edition_image.load()
+
+        r_min, g_min, b_min, r_max, g_max, b_max = 255, 255, 255, 0, 0, 0
+    
+        if file_name == "horizontalsobel.txt" or file_name == "verticalsobel.txt":
+
+            for i in range(largura):
+                for j in range(altura):
+                    pixel_r, pixel_g, pixel_b = edition_image.getpixel((i, j))
+                    if pixel_r > r_max: r_max = pixel_r
+                    if pixel_r < r_min: r_min = pixel_r
+                    if pixel_g > g_max: g_max = pixel_g
+                    if pixel_g < g_min: g_min = pixel_g
+                    if pixel_b > b_max: b_max = pixel_b
+                    if pixel_b < b_min: b_min = pixel_b
+
+            for i in range(largura):
+                for j in range(altura):
+                    pixel_r, pixel_g, pixel_b = edition_image.getpixel((i, j))
+                    #novo_pixel = int(((pixel_atual - pixel_min)/(pixel_max - pixel_min))*255)
+                    novo_pixel_r = ((pixel_r - r_min)/(r_max - r_min))*255
+                    novo_pixel_g = ((pixel_g - g_min)/(g_max - g_min))*255
+                    novo_pixel_b = ((pixel_b - b_min)/(b_max - b_min))*255
+                    matrix_pixels[i, j] = (int(novo_pixel_r), int(novo_pixel_g), int(novo_pixel_b))
+
+        exibithion()
 
 # Botão reset
 def reset_image():
@@ -265,38 +374,17 @@ def reset_image():
     exibithion()
 
 # Frame da esquerda onde ficarão os botões
-left_frame = tk.Frame(root, width=200, height=600, bg="grey")
+left_frame = tk.Frame(root, width=200, height=720, bg="grey")
 left_frame.pack(side="left", fill="y")
 
 # Onde a imagem será exibida
-canvas = tk.Canvas(root, width=1080, height=720,bg="white")
+canvas = tk.Canvas(root, width=1080, height=720, bg="white")
 canvas.pack()
 
 ##### BOTÕES #####
 
 # Botão brilho HSB multiplicativo
-def get_brightness_factor():
-    def apply_brightness_factor():
-        global brightness_factor
-        new_brightness = float(brightness_entry.get())
-        brightness_factor = new_brightness
-        brightness()  # Aplica o novo fator de brilho
-        
-    brightness_window = tk.Toplevel(root)
-    brightness_window.title("Fator de Brilho")
-    brightness_window.geometry("200x100")
-    brightness_window.resizable(False, False)
-
-    brightness_label = tk.Label(brightness_window, text="Insira o fator de brilho:")
-    brightness_label.pack(pady=5)
-
-    brightness_entry = tk.Entry(brightness_window)
-    brightness_entry.pack(pady=5)
-
-    ok_button = tk.Button(brightness_window, text="OK", command=apply_brightness_factor)
-    ok_button.pack(pady=5)
-
-brightness_button = tk.Button(left_frame, text="Brilho HSB Multiplicativo", command=get_brightness_factor, bg="white")
+brightness_button = tk.Button(left_frame, text="Brilho HSB Multiplicativo", command=brightness, bg="white")
 brightness_button.pack(padx=5, pady=5, fill="x")
 
 # Botão saturação HSB multiplicativa
@@ -313,8 +401,8 @@ saturationAssignment_button = tk.Button(left_frame, text="Atribuição de Satura
 saturationAssignment_button.pack(padx=5, pady=5, fill="x")
 
 # Botão máscara de filtro
-filterMask_button = tk.Button(left_frame, text="Máscara de Filtro", bg="white")
-filterMask_button.pack(padx=5,pady=5, fill="x")
+filterMask_button = tk.Button(left_frame, text="Máscara de Filtro", command=filter_mask, bg="white")
+filterMask_button.pack(padx=5, pady=5, fill="x")
 
 # Botão reset
 reset_button = tk.Button(left_frame, text="Reset", command=reset_image, bg="white")
@@ -327,7 +415,5 @@ exportImage_button.pack(side="bottom", padx=5, pady=5, fill="x")
 # Botão importar imagem
 importImage_button = tk.Button(left_frame, text="Importar Imagem", command=import_image, bg="white")
 importImage_button.pack(side="bottom", padx=5, pady=5, fill="x")
-
-
 
 root.mainloop()
