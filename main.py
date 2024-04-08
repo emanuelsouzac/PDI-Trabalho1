@@ -301,19 +301,17 @@ def filter_mask():
         file_name = os.path.basename(file_path)
 
         with open(file_path, 'r') as file:
-            lines = file.readlines()
+            elements = file.readlines()
+
+        lines= int(elements[0].split()[0])
+        columns = int(elements[1].split()[0])
+    
 
         matrix = []
 
-        for line in lines:
-            matrix.append([float(num) for num in line.split()])
-
-        # Número de linhas
-        lines = len(matrix)
-
-        # Número de colunas
-        columns = len(matrix[0])
-
+        for element in elements[2:]:
+            matrix.append([float(num) for num in element.split()])
+    
         largura, altura = (edition_image.width - columns + 1), (edition_image.height - lines + 1)
         img2 = Image.new('RGB', (largura, altura))
         matrix_pixels2 = img2.load()
