@@ -10,6 +10,7 @@ root.geometry("1280x720")
 root.title("Processamento de Imagens")
 root.config(bg="white")
 
+# Variáveis globais
 file_path = ""
 original_image, edition_image = None, None
 
@@ -89,58 +90,40 @@ def HSBtoRGB(h, s, b):
 
 ##### FUNÇÃO PARA EXIBIR IMAGEM #####
 
-def exibithion():
+def display():
     global edition_image
 
     # Fazendo cópia da imagem editada para exibição
-    exibithion_image = copy.copy(edition_image)
+    display_image = copy.copy(edition_image)
+
     # Ajustando tamanho da imagem para caber na exibição
-    if exibithion_image.width > exibithion_image.height:
+    if display_image.width > display_image.height:
         # Largura maior que altura
-        width = 750
-        height = int(exibithion_image.height * (750 / exibithion_image.width))
-        exibithion_image = exibithion_image.resize((width, height), Image.LANCZOS)
-    elif exibithion_image.height > exibithion_image.width:
+        width = 900
+        height = int(display_image.height * (900 / display_image.width))
+        display_image = display_image.resize((width, height), Image.LANCZOS)
+    elif display_image.height > display_image.width:
         # Altura maior que largura
-        height = 600
-        width = int(exibithion_image.width * (600 / exibithion_image.height))
-        exibithion_image = exibithion_image.resize((width, height), Image.LANCZOS)
+        height = 720
+        width = int(display_image.width * (720 / display_image.height))
+        display_image = display_image.resize((width, height), Image.LANCZOS)
     else:
         # Dimensões iguais
-        height = 600
-        width = 600
-        exibithion_image = exibithion_image.resize((width, height), Image.LANCZOS)
-    # Ajustando canvas para o novo tamanho da imagem
-    canvas.config(width=exibithion_image.width, height=exibithion_image.height)
-    # Convertendo imagem para ser apresentada no canvas
-    exibithion_image = ImageTk.PhotoImage(exibithion_image)
-    # Exibindo imagem
-    canvas.image = exibithion_image
-    canvas.create_image(0, 0, image=exibithion_image, anchor="nw")
+        height = 720
+        width = 720
+        display_image = display_image.resize((width, height), Image.LANCZOS)
 
+    # Ajustando canvas para o novo tamanho da imagem
+    canvas.config(width=display_image.width, height=display_image.height)
+
+    # Convertendo imagem para ser apresentada no canvas
+    display_image = ImageTk.PhotoImage(display_image)
+
+    # Exibindo imagem
+    canvas.image = display_image
+    canvas.create_image(0, 0, image=display_image, anchor="nw")
 
 ##### FUNÇÕES DOS BOTÕES #####
-
-# Função genérica para pop-up de entrada de usuário
-def get_user_input(label_text, callback):
-    def apply_user_input():
-        user_input = user_input_entry.get()
-        callback(user_input)
-        user_input_window.destroy()
-
-    user_input_window = tk.Toplevel(root)
-    user_input_window.title("Entrada do Usuário")
-    user_input_window.geometry("200x100")
-    user_input_window.resizable(False, False)
-
-    user_input_label = tk.Label(user_input_window, text=label_text)
-    user_input_label.pack(pady=5)
-
-    user_input_entry = tk.Entry(user_input_window)
-    user_input_entry.pack(pady=5)
-
-    ok_button = tk.Button(user_input_window, text="OK", command=apply_user_input)
-    ok_button.pack(pady=5)
 
 # Função de importar imagem
 def import_image():
@@ -150,7 +133,7 @@ def import_image():
     original_image = Image.open(file_path)
     edition_image = copy.copy(original_image)
 
-    exibithion()
+    display()
 
 # Função de exportar imagem
 def export_image():
@@ -165,32 +148,61 @@ def export_image():
     else:
         messagebox.showerror("Erro", "Nenhuma imagem foi importada.")
 
+# Função que gera um pop-up para usuário inserir fator
+# que será usado no aumento do brilho, saturação e matiz
+def get_user_input(label_text, callback):
+    def apply_user_input():
+        # Pega o valor da entrada
+        user_input = user_input_entry.get()
+        # Chama a função em questão (brilho, saturação ou matiz), passando o valor
+        callback(user_input)
+        # Fecha o pop-up
+        user_input_window.destroy()
+
+    # Definições da janela
+    user_input_window = tk.Toplevel(root)
+    user_input_window.title("Entrada do Usuário")
+    user_input_window.geometry("200x100")
+    user_input_window.resizable(False, False)
+
+    user_input_label = tk.Label(user_input_window, text=label_text)
+    user_input_label.pack(pady=5)
+
+    user_input_entry = tk.Entry(user_input_window)
+    user_input_entry.pack(pady=5)
+
+    ok_button = tk.Button(user_input_window, text="OK", command=apply_user_input)
+    ok_button.pack(pady=5)
+
 # Função de brilho multiplicativo
 def brightness():
-    def apply_brightness_factor(new_brightness):
+    def apply_brightness_factor(brightness_factor):
         global edition_image
 
-        width = edition_image.size[0]
-        height = edition_image.size[1]
+        # Variável que permitirá acesso e manipulação em cada pixel da imagem
         matrix_pixels = edition_image.load()
 
-        for i in range(width):
-            for j in range(height):
+        for i in range(edition_image.width):
+            for j in range(edition_image.height):
+                # Pegando cada banda de cor do pixel (i,j)
                 pixel = matrix_pixels[i, j]
-
                 red = pixel[0]
                 green = pixel[1]
                 blue = pixel[2]
 
+                # Após converter para HSB
                 hue, sat, bright = RGBtoHSB(red, green, blue)
-                bright = bright * float(new_brightness)
+                # Aplicação do fator na variável de brilho
+                bright = bright * float(brightness_factor)
+                # Conversão para HSB
                 red, green, blue = HSBtoRGB(hue, sat, bright)
 
-                new_pixel = (red, green, blue)
-                matrix_pixels[i, j] = new_pixel
+                # Aplicação da mudança no pixel (i,j)
+                matrix_pixels[i, j] = (red, green, blue)
 
-        exibithion()
+        display()
 
+    # Abre um pop-up para capturar fator do usuário
     get_user_input("Insira o fator de brilho:", apply_brightness_factor)
 
 # Função de saturação multiplicativa
@@ -198,27 +210,24 @@ def saturation():
     def apply_saturation_factor(saturation_factor):
         global edition_image
 
-        width = edition_image.size[0]
-        height = edition_image.size[1]
         matrix_pixels = edition_image.load()
 
-        for i in range(width):
-            for j in range(height):
+        for i in range(edition_image.width):
+            for j in range(edition_image.height):
                 pixel = matrix_pixels[i, j]
-
                 red = pixel[0]
                 green = pixel[1]
                 blue = pixel[2]
 
                 hue, sat, bright = RGBtoHSB(red, green, blue)
-                sat = sat * float(saturation_factor)  # Após converter para HSB, aplicar fator na variável de saturação, posteriormente convertendo para RGB e exibindo o resultado
+                sat = sat * float(saturation_factor)
                 red, green, blue = HSBtoRGB(hue, sat, bright)
 
-                new_pixel = (red, green, blue)
-                matrix_pixels[i, j] = new_pixel
+                matrix_pixels[i, j] = (red, green, blue)
 
-        exibithion()
+        display()
 
+    # Abre um pop-up para capturar fator do usuário
     get_user_input("Insira o fator de saturação:", apply_saturation_factor)
 
 # Função de matiz aditiva
@@ -226,27 +235,24 @@ def hue():
     def apply_hue_factor(hue_factor):
         global edition_image
 
-        width = edition_image.size[0]
-        height = edition_image.size[1]
         matrix_pixels = edition_image.load()
 
-        for i in range(width):
-            for j in range(height):
+        for i in range(edition_image.width):
+            for j in range(edition_image.height):
                 pixel = matrix_pixels[i, j]
-
                 red = pixel[0]
                 green = pixel[1]
                 blue = pixel[2]
 
                 hue, sat, bright = RGBtoHSB(red, green, blue)
-                hue = (hue + float(hue_factor)) % 360  # Após converter para HSB, aplicar fator na variável de matiz, posteriormente convertendo para RGB e exibindo o resultado
+                hue = (hue + float(hue_factor)) % 360 
                 red, green, blue = HSBtoRGB(hue, sat, bright)
 
-                new_pixel = (red, green, blue)
-                matrix_pixels[i, j] = new_pixel
+                matrix_pixels[i, j] = (red, green, blue)
 
-        exibithion()
+        display()
 
+    # Abre um pop-up para capturar fator do usuário
     get_user_input("Insira o fator de matiz:", apply_hue_factor)
 
 # Função de atribuição de saturação
@@ -260,14 +266,11 @@ def saturation_assignment():
     # Verificando se as duas imagens possuem mesmas dimensões
     if edition_image.width == image_2.width and edition_image.height == image_2.height:
 
-        width = edition_image.size[0]
-        height = edition_image.size[1]
-
         matrix_pixels_1 = edition_image.load()
         matrix_pixels_2 = image_2.load()
 
-        for i in range(width):
-            for j in range(height):
+        for i in range(edition_image.width):
+            for j in range(edition_image.height):
                 pixel_1 = matrix_pixels_1[i, j]
                 red_1 = pixel_1[0]
                 green_1 = pixel_1[1]
@@ -280,12 +283,13 @@ def saturation_assignment():
                 blue_2 = pixel_2[2]
                 hue_2, sat_2, bright_2 = RGBtoHSB(red_2, green_2, blue_2)
 
+                # Conversão a imagem editada de volta para RGB,
+                # porém atribuindo a saturação da segunda imagem
                 red_1, green_1, blue_1 = HSBtoRGB(hue_1, sat_2, bright_1)
 
-                new_pixel_1 = (red_1, green_1, blue_1)
-                matrix_pixels_1[i, j] = new_pixel_1
+                matrix_pixels_1[i, j] = (red_1, green_1, blue_1)
 
-        exibithion()
+        display()
     else:
         messagebox.showerror("Erro", "As duas imagens não possuem as mesmas dimensões.")
 
@@ -293,7 +297,7 @@ def saturation_assignment():
 def filter_mask():
     global edition_image
 
-    # Abrindo txt e transformando em matriz
+    # Abrindo txt
     file_path = filedialog.askopenfilename(filetypes=[("Arquivos de texto", "*.txt")])
 
     if file_path:
@@ -303,15 +307,17 @@ def filter_mask():
         with open(file_path, 'r') as file:
             elements = file.readlines()
 
+        # Coletando as dimensões m e n da máscara
         lines= int(elements[0].split()[0])
         columns = int(elements[1].split()[0])
     
-
+        # Criando a matriz a partir do txt
         matrix = []
-
         for element in elements[2:]:
             matrix.append([float(num) for num in element.split()])
-    
+
+        # Criação da nova imagem que será resultado da correlação
+        # Por ser correlação sem extensão, a nova imagem possui reajuste das dimensões
         largura, altura = (edition_image.width - columns + 1), (edition_image.height - lines + 1)
         img2 = Image.new('RGB', (largura, altura))
         matrix_pixels2 = img2.load()
@@ -335,14 +341,16 @@ def filter_mask():
                 # Definindo os valores RGB no pixel correspondente na nova imagem
                 matrix_pixels2[j, i] = (int(r), int(g), int(b))
         
+        # A imagem de edição assume o valor na nova imagem
         edition_image = copy.copy(img2)
         
-        matrix_pixels = edition_image.load()
-
-        r_min, g_min, b_min, r_max, g_max, b_max = 255, 255, 255, 0, 0, 0
-    
+        # Expansão de histograma    
         if file_name == "horizontalsobel.txt" or file_name == "verticalsobel.txt":
-
+            
+            matrix_pixels = edition_image.load()
+            r_min, g_min, b_min, r_max, g_max, b_max = 255, 255, 255, 0, 0, 0
+            
+            # Coletando os valores mínimos e máximos de cada banda de cor
             for i in range(largura):
                 for j in range(altura):
                     pixel_r, pixel_g, pixel_b = edition_image.getpixel((i, j))
@@ -353,23 +361,23 @@ def filter_mask():
                     if pixel_b > b_max: b_max = pixel_b
                     if pixel_b < b_min: b_min = pixel_b
 
+            # Realizando a expansão de histograma em cada banda de cor
             for i in range(largura):
                 for j in range(altura):
                     pixel_r, pixel_g, pixel_b = edition_image.getpixel((i, j))
-                    #novo_pixel = int(((pixel_atual - pixel_min)/(pixel_max - pixel_min))*255)
                     novo_pixel_r = ((pixel_r - r_min)/(r_max - r_min))*255
                     novo_pixel_g = ((pixel_g - g_min)/(g_max - g_min))*255
                     novo_pixel_b = ((pixel_b - b_min)/(b_max - b_min))*255
                     matrix_pixels[i, j] = (int(novo_pixel_r), int(novo_pixel_g), int(novo_pixel_b))
 
-        exibithion()
+        display()
 
 # Botão reset
 def reset_image():
     global original_image, edition_image
     edition_image = copy.copy(original_image)
 
-    exibithion()
+    display()
 
 # Frame da esquerda onde ficarão os botões
 left_frame = tk.Frame(root, width=200, height=720, bg="grey")
