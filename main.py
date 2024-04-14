@@ -47,20 +47,20 @@ def HSBtoRGB(h, s, b):
     if s == 0:
         r = g = b = b
     else:
-        # the color wheel consists of 6 sectors. Figure out which sector
-        # you're in.
+        # A roda de cores consiste em 6 setores.       
         sectorPos = h / 60.0
         sectorNumber = int(sectorPos)
-        # get the fractional part of the sector
+
+        # Obtendo a parte fracionária do setor
         fractionalSector = sectorPos - sectorNumber
 
-        # calculate values for the three axes of the color.
+        # Calculando os valores para os três eixos da cor.
         p = b * (1.0 - s)
         q = b * (1.0 - (s * fractionalSector))
         t = b * (1.0 - (s * (1 - fractionalSector)))
 
-        # assign the fractional colors to r, g, and b based on the sector
-        # the angle is in.
+        # Atribuindo as cores fracionárias a r, g e b com base no setor
+        
         if sectorNumber == 0:
             r = b
             g = t
@@ -318,12 +318,12 @@ def filter_mask():
 
         # Criação da nova imagem que será resultado da correlação
         # Por ser correlação sem extensão, a nova imagem possui reajuste das dimensões
-        largura, altura = (edition_image.width - columns + 1), (edition_image.height - lines + 1)
-        img2 = Image.new('RGB', (largura, altura))
+        width, height = (edition_image.width - columns + 1), (edition_image.height - lines + 1)
+        img2 = Image.new('RGB', (width, height))
         matrix_pixels2 = img2.load()
         
-        for i in range(altura):
-            for j in range(largura):
+        for i in range(height):
+            for j in range(width):
                 r, g, b = 0, 0, 0
                 for m in range(lines):
                     for n in range(columns):
@@ -351,8 +351,8 @@ def filter_mask():
             r_min, g_min, b_min, r_max, g_max, b_max = 255, 255, 255, 0, 0, 0
             
             # Coletando os valores mínimos e máximos de cada banda de cor
-            for i in range(largura):
-                for j in range(altura):
+            for i in range(width):
+                for j in range(height):
                     pixel_r, pixel_g, pixel_b = edition_image.getpixel((i, j))
                     if pixel_r > r_max: r_max = pixel_r
                     if pixel_r < r_min: r_min = pixel_r
@@ -362,8 +362,8 @@ def filter_mask():
                     if pixel_b < b_min: b_min = pixel_b
 
             # Realizando a expansão de histograma em cada banda de cor
-            for i in range(largura):
-                for j in range(altura):
+            for i in range(width):
+                for j in range(height):
                     pixel_r, pixel_g, pixel_b = edition_image.getpixel((i, j))
                     novo_pixel_r = ((pixel_r - r_min)/(r_max - r_min))*255
                     novo_pixel_g = ((pixel_g - g_min)/(g_max - g_min))*255
